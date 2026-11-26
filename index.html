@@ -48,32 +48,62 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="geneticpos">geneticPoS<a class="anchor" aria-label="anchor" href="#geneticpos"></a>
 </h1></div>
-<p><code>geneticPoS</code> lets a statistical geneticist hold their own cis-pQTL Mendelian randomization (MR) and colocalization results against the genetic-support criteria of Karim et al. A candidate that meets the criteria is given the historical proportion of the MR + coloc support group of Karim v2 Figure 1a that went from phase 1 to launch (20/36). This proportion is a past population outcome, not a probability for the candidate. <a href="https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full" class="external-link">Karim et al. v2</a></p>
+<!-- badges: start -->
+
+<p><strong>Hold your own cis-pQTL MR and colocalization results against the genetic-support criteria of Karim et al., and read the historical launch proportion that goes with them.</strong></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"geneticPoS"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://daikikumakura.r-universe.dev"</span>, <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Or from the package root of a clone of this repository:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">R</span> CMD INSTALL .</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"DaikiKumakura/geneticPoS"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="use-your-own-results">Use your own results<a class="anchor" aria-label="anchor" href="#use-your-own-results"></a>
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+</h2>
+<p>One MR result and one coloc result, joined by the pQTL assay, the outcome GWAS, the genome build and the locus:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DaikiKumakura/geneticPoS" class="external-link">geneticPoS</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">keys</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>exposure_id <span class="op">=</span> <span class="st">"P1"</span>, outcome_id <span class="op">=</span> <span class="st">"D1"</span>, build <span class="op">=</span> <span class="st">"GRCh38"</span>, locus_id <span class="op">=</span> <span class="st">"L1"</span><span class="op">)</span></span>
+<span><span class="va">mr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">keys</span>, mr_id <span class="op">=</span> <span class="st">"M1"</span>, target_id <span class="op">=</span> <span class="st">"G1"</span>, indication_id <span class="op">=</span> <span class="st">"UC"</span>,</span>
+<span>            mr_p <span class="op">=</span> <span class="fl">4e-10</span>, l2g_share <span class="op">=</span> <span class="fl">0.67</span>, mesh_similarity <span class="op">=</span> <span class="fl">0.91</span>, measured <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">coloc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">keys</span>, coloc_id <span class="op">=</span> <span class="st">"K1"</span>, h4 <span class="op">=</span> <span class="fl">0.93</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/karim_pos.html">karim_pos</a></span><span class="op">(</span><span class="va">mr</span>, <span class="va">coloc</span><span class="op">)</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">candidates</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mr_id"</span>, <span class="st">"matched_coloc_id"</span>, <span class="st">"status"</span>, <span class="st">"match_basis"</span>, <span class="st">"reference_group"</span>, <span class="st">"historical_launch_rate"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">benchmark</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"group"</span>, <span class="st">"phase1_n"</span>, <span class="st">"launched_n"</span>, <span class="st">"relative_success"</span>, <span class="st">"rs_lower"</span>, <span class="st">"rs_upper"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+<pre class="text"><code>  mr_id matched_coloc_id         status       match_basis reference_group historical_launch_rate
+1    M1               K1 thresholds_met exact_identifiers       supported              0.5555556
+
+       group phase1_n launched_n relative_success rs_lower rs_upper
+1  supported       36         20             5.24     3.88     7.07
+2 comparison     7164        760             5.24     3.88     7.07</code></pre>
+<p>The candidate meets the criteria, so it is given the launch proportion of the support group of Karim v2 Figure 1a (20/36). This proportion is a past population outcome, not a probability for the candidate.</p>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<p><a href="https://daikikumakura.github.io/geneticPoS/">Package website</a> · <a href="https://daikikumakura.github.io/geneticPoS/reference/">Function reference</a> · <a href="https://daikikumakura.github.io/geneticPoS/news/">Changelog</a> · <a href="https://github.com/DaikiKumakura/geneticPoS/releases" class="external-link">Releases</a> · <a href="https://daikikumakura.r-universe.dev/geneticPoS" class="external-link">R-universe</a></p>
+</div>
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
+<p><code>geneticPoS</code> is for a statistical geneticist who has their own cis-pQTL MR and colocalization results and wants to know where they stand against the benchmark of <a href="https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full" class="external-link">Karim et al. v2</a>. The one function, <code><a href="reference/karim_pos.html">karim_pos()</a></code>, keeps your rows, matches each MR result to its coloc result, checks the support criteria, and looks up the benchmark. It does not fill in a missing value by guessing: unmatched rows, multiple matches, missing references and unmet thresholds stay in <code>status</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="your-results">Your results<a class="anchor" aria-label="anchor" href="#your-results"></a>
 </h2>
 <ol style="list-style-type: decimal">
 <li>Prepare a cis-MR result table and a coloc result table. Data frames, CSV and TSV files are accepted. Column names such as <code>pval</code> from TwoSampleMR and <code>PP.H4.abf</code> from coloc are recognized.</li>
 <li>Give both tables the pQTL assay, the outcome GWAS, the genome build and a locus identifier. If a locus has several signals, add <code>signal_id</code> to both tables. The MR table also needs the gene symbol and the MeSH ID of the indication.</li>
 <li>If the bundled reference lacks something for your locus, pass <code>l2g_share</code>, <code>mesh_similarity</code> and <code>measured</code> (whether the target is measured). Information missing from your tables can be passed in <code>metadata</code>. If you have confirmed from the source papers which MR row belongs to which coloc row, pass that with its evidence in <code>links</code>.</li>
 </ol>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DaikiKumakura/geneticPoS" class="external-link">geneticPoS</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/example.html" class="external-link">example</a></span><span class="op">(</span><span class="va">karim_pos</span><span class="op">)</span></span></code></pre></div>
-<p>To run a public pQTL example, run this at the repository root after installing:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">--vanilla</span> reproducibility/check_delange_pqtl.R</span></code></pre></div>
-<p>It enters IL23R × Crohn’s disease with standard MR and coloc column names, supplies the L2G share for that locus, and reaches the support group. The script can also re-extract the coefficients from the public source data. <a href="reproducibility/INDEPENDENT_PQTL.html">Independent pQTL check</a></p>
 </div>
 <div class="section level2">
-<h2 id="read-the-result">Read the result<a class="anchor" aria-label="anchor" href="#read-the-result"></a>
+<h2 id="the-result">The result<a class="anchor" aria-label="anchor" href="#the-result"></a>
 </h2>
 <table class="table">
 <colgroup>
@@ -103,31 +133,32 @@
 </tr>
 </tbody>
 </table>
-<p>The support group requires MR p ≤ 0.05/47,000,000, H4 ≥ 0.8, L2G share ≥ 0.5, MeSH similarity ≥ 0.8 and a measured target. Unmatched rows, multiple matches, missing references and unmet thresholds stay in <code>status</code>. A single analysis failing a threshold does not by itself put a gene–indication pair in the comparison group. See <code><a href="reference/karim_pos.html">?karim_pos</a></code> for the arguments and the details of the verdict.</p>
+<p>The support group requires MR p ≤ 0.05/47,000,000, H4 ≥ 0.8, L2G share ≥ 0.5, MeSH similarity ≥ 0.8 and a measured target. A single analysis failing a threshold does not by itself put a gene–indication pair in the comparison group. See <code><a href="reference/karim_pos.html">?karim_pos</a></code> for the arguments and the details of the verdict.</p>
 </div>
 <div class="section level2">
 <h2 id="validation-and-limitations">Validation and limitations<a class="anchor" aria-label="anchor" href="#validation-and-limitations"></a>
 </h2>
+<p>Details are in <a href="reproducibility/INDEPENDENT_PQTL.html"><code>reproducibility/INDEPENDENT_PQTL.md</code></a>.</p>
 <ul>
+<li><p>The tests cover row matching, missing values and multiple matches.</p></li>
 <li>
-<strong>Validation:</strong> the tests cover row matching, missing values and multiple matches. A public data set (IL23R × Crohn’s disease, one pair) reproduces the verdict.</li>
-<li>
-<strong>Result:</strong> this pair meets the support criteria and returns the historical launch proportion of 20/36 (55.56%).</li>
-<li>
-<strong>Limitations:</strong> the check on real data covers one pair. How well the package predicts the launch of an individual candidate has not been evaluated.</li>
-<li>
-<strong>Reproducibility:</strong> <a href="reproducibility/INDEPENDENT_PQTL.html">inputs and steps of the independent check</a>.</li>
+<p>A public data set (IL23R × Crohn’s disease, one pair) reproduces the verdict: the pair meets the support criteria and returns 20/36 (55.56%). To run it from a clone of the repository:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">--vanilla</span> reproducibility/check_delange_pqtl.R</span></code></pre></div>
+</li>
+<li><p><strong>Limitations.</strong> The check on real data covers one pair. How well the package predicts the launch of an individual candidate has not been evaluated. The bundled reference is a processed snapshot; its sources and terms are in <a href="DATA_SOURCES.html">DATA_SOURCES.md</a>.</p></li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>Cite the archived version: <a href="https://doi.org/10.5281/zenodo.24549534" class="external-link uri">https://doi.org/10.5281/zenodo.24549534</a> (all versions). The metadata is in <a href="CITATION.cff"><code>CITATION.cff</code></a>; <code>citation("geneticPoS")</code> gives the same. The source of the reference benchmark is <a href="https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full" class="external-link">Karim et al. v2</a>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"geneticPoS"</span><span class="op">)</span></span></code></pre></div>
+<p>Cite the archived version: <a href="https://doi.org/10.5281/zenodo.24549534" class="external-link uri">https://doi.org/10.5281/zenodo.24549534</a> (all versions). The metadata is in <a href="CITATION.cff"><code>CITATION.cff</code></a>. The source of the reference benchmark is <a href="https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full" class="external-link">Karim et al. v2</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>The code is GPL-3. The sources, transformations and terms of the reference data are in <a href="DATA_SOURCES.html">DATA_SOURCES.md</a>.</p>
+<p>The code is licensed under GPL-3. See <a href="LICENSE">LICENSE</a>. The sources, transformations and terms of the reference data are in <a href="DATA_SOURCES.html">DATA_SOURCES.md</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -160,7 +191,14 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://daikikumakura.r-universe.dev/geneticPoS" class="external-link"><img src="https://daikikumakura.r-universe.dev/badges/geneticPoS" alt="R-universe"></a></li>
+<li><a href="https://github.com/DaikiKumakura/geneticPoS/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/DaikiKumakura/geneticPoS/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://doi.org/10.5281/zenodo.24549534" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.24549534.svg" alt="DOI"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>

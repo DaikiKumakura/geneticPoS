@@ -1,13 +1,8 @@
 # geneticPoS
 
-`geneticPoS` lets a statistical geneticist hold their own cis-pQTL
-Mendelian randomization (MR) and colocalization results against the
-genetic-support criteria of Karim et al. A candidate that meets the
-criteria is given the historical proportion of the MR + coloc support
-group of Karim v2 Figure 1a that went from phase 1 to launch (20/36).
-This proportion is a past population outcome, not a probability for the
-candidate. [Karim et
-al. v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full)
+**Hold your own cis-pQTL MR and colocalization results against the
+genetic-support criteria of Karim et al., and read the historical launch
+proportion that goes with them.**
 
 ## Installation
 
@@ -16,13 +11,67 @@ al. v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full)
 install.packages("geneticPoS", repos = c("https://daikikumakura.r-universe.dev", "https://cloud.r-project.org"))
 ```
 
-Or from the package root of a clone of this repository:
+``` r
 
-``` sh
-R CMD INSTALL .
+# install.packages("remotes")
+remotes::install_github("DaikiKumakura/geneticPoS")
 ```
 
-## Use your own results
+## Quick start
+
+One MR result and one coloc result, joined by the pQTL assay, the
+outcome GWAS, the genome build and the locus:
+
+``` r
+
+library(geneticPoS)
+
+keys <- data.frame(exposure_id = "P1", outcome_id = "D1", build = "GRCh38", locus_id = "L1")
+mr <- cbind(keys, mr_id = "M1", target_id = "G1", indication_id = "UC",
+            mr_p = 4e-10, l2g_share = 0.67, mesh_similarity = 0.91, measured = TRUE)
+coloc <- cbind(keys, coloc_id = "K1", h4 = 0.93)
+
+res <- karim_pos(mr, coloc)
+res$candidates[, c("mr_id", "matched_coloc_id", "status", "match_basis", "reference_group", "historical_launch_rate")]
+res$benchmark[, c("group", "phase1_n", "launched_n", "relative_success", "rs_lower", "rs_upper")]
+```
+
+``` text
+  mr_id matched_coloc_id         status       match_basis reference_group historical_launch_rate
+1    M1               K1 thresholds_met exact_identifiers       supported              0.5555556
+
+       group phase1_n launched_n relative_success rs_lower rs_upper
+1  supported       36         20             5.24     3.88     7.07
+2 comparison     7164        760             5.24     3.88     7.07
+```
+
+The candidate meets the criteria, so it is given the launch proportion
+of the support group of Karim v2 Figure 1a (20/36). This proportion is a
+past population outcome, not a probability for the candidate.
+
+## Documentation
+
+[Package website](https://daikikumakura.github.io/geneticPoS/) ·
+[Function
+reference](https://daikikumakura.github.io/geneticPoS/reference/) ·
+[Changelog](https://daikikumakura.github.io/geneticPoS/news/) ·
+[Releases](https://github.com/DaikiKumakura/geneticPoS/releases) ·
+[R-universe](https://daikikumakura.r-universe.dev/geneticPoS)
+
+## Overview
+
+`geneticPoS` is for a statistical geneticist who has their own cis-pQTL
+MR and colocalization results and wants to know where they stand against
+the benchmark of [Karim et
+al. v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full).
+The one function,
+[`karim_pos()`](https://daikikumakura.github.io/geneticPoS/reference/karim_pos.md),
+keeps your rows, matches each MR result to its coloc result, checks the
+support criteria, and looks up the benchmark. It does not fill in a
+missing value by guessing: unmatched rows, multiple matches, missing
+references and unmet thresholds stay in `status`.
+
+## Your results
 
 1.  Prepare a cis-MR result table and a coloc result table. Data frames,
     CSV and TSV files are accepted. Column names such as `pval` from
@@ -38,26 +87,7 @@ R CMD INSTALL .
     row belongs to which coloc row, pass that with its evidence in
     `links`.
 
-``` r
-
-library(geneticPoS)
-example(karim_pos)
-```
-
-To run a public pQTL example, run this at the repository root after
-installing:
-
-``` sh
-Rscript --vanilla reproducibility/check_delange_pqtl.R
-```
-
-It enters IL23R × Crohn’s disease with standard MR and coloc column
-names, supplies the L2G share for that locus, and reaches the support
-group. The script can also re-extract the coefficients from the public
-source data. [Independent pQTL
-check](https://daikikumakura.github.io/geneticPoS/reproducibility/INDEPENDENT_PQTL.md)
-
-## Read the result
+## The result
 
 | Output | Content |
 |----|----|
@@ -67,37 +97,49 @@ check](https://daikikumakura.github.io/geneticPoS/reproducibility/INDEPENDENT_PQ
 | `inputs` | The input before the reference was resolved |
 
 The support group requires MR p ≤ 0.05/47,000,000, H4 ≥ 0.8, L2G share ≥
-0.5, MeSH similarity ≥ 0.8 and a measured target. Unmatched rows,
-multiple matches, missing references and unmet thresholds stay in
-`status`. A single analysis failing a threshold does not by itself put a
-gene–indication pair in the comparison group. See
+0.5, MeSH similarity ≥ 0.8 and a measured target. A single analysis
+failing a threshold does not by itself put a gene–indication pair in the
+comparison group. See
 [`?karim_pos`](https://daikikumakura.github.io/geneticPoS/reference/karim_pos.md)
 for the arguments and the details of the verdict.
 
 ## Validation and limitations
 
-- **Validation:** the tests cover row matching, missing values and
-  multiple matches. A public data set (IL23R × Crohn’s disease, one
-  pair) reproduces the verdict.
-- **Result:** this pair meets the support criteria and returns the
-  historical launch proportion of 20/36 (55.56%).
-- **Limitations:** the check on real data covers one pair. How well the
+Details are in
+[`reproducibility/INDEPENDENT_PQTL.md`](https://daikikumakura.github.io/geneticPoS/reproducibility/INDEPENDENT_PQTL.md).
+
+- The tests cover row matching, missing values and multiple matches.
+
+- A public data set (IL23R × Crohn’s disease, one pair) reproduces the
+  verdict: the pair meets the support criteria and returns 20/36
+  (55.56%). To run it from a clone of the repository:
+
+  ``` sh
+  Rscript --vanilla reproducibility/check_delange_pqtl.R
+  ```
+
+- **Limitations.** The check on real data covers one pair. How well the
   package predicts the launch of an individual candidate has not been
-  evaluated.
-- **Reproducibility:** [inputs and steps of the independent
-  check](https://daikikumakura.github.io/geneticPoS/reproducibility/INDEPENDENT_PQTL.md).
+  evaluated. The bundled reference is a processed snapshot; its sources
+  and terms are in
+  [DATA_SOURCES.md](https://daikikumakura.github.io/geneticPoS/DATA_SOURCES.md).
 
 ## Citation
 
+``` r
+
+citation("geneticPoS")
+```
+
 Cite the archived version: <https://doi.org/10.5281/zenodo.24549534>
 (all versions). The metadata is in
-[`CITATION.cff`](https://daikikumakura.github.io/geneticPoS/CITATION.cff);
-`citation("geneticPoS")` gives the same. The source of the reference
-benchmark is [Karim et
+[`CITATION.cff`](https://daikikumakura.github.io/geneticPoS/CITATION.cff).
+The source of the reference benchmark is [Karim et
 al. v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full).
 
 ## License
 
-The code is GPL-3. The sources, transformations and terms of the
-reference data are in
+The code is licensed under GPL-3. See
+[LICENSE](https://daikikumakura.github.io/geneticPoS/LICENSE). The
+sources, transformations and terms of the reference data are in
 [DATA_SOURCES.md](https://daikikumakura.github.io/geneticPoS/DATA_SOURCES.md).
