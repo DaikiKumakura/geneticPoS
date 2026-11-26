@@ -11,3 +11,8 @@ template:
 reference:
   - title: Genetic evidence benchmark
     contents: [karim_pos]
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+      - articles/tutorial

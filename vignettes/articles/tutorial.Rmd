@@ -1,0 +1,178 @@
+---
+title: "From your MR and coloc results to a benchmark verdict"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+This page walks through one run of `karim_pos()` with four made-up candidates, one for each thing that
+can happen to a row: it meets the criteria, it misses a threshold, it lacks a value, or its coloc result
+cannot be told apart from another. Then it shows how to fix the last two, and how the bundled reference fills
+in values for a real gene. All output below comes from running the code.
+
+## 1. What you give, what you get
+
+`karim_pos()` takes two tables:
+
+- **`mr`**: one row per cis-pQTL MR result, with `mr_id`, the gene (`target_id`), the indication
+  (`indication_id`, a MeSH ID), the pQTL assay (`exposure_id`), the outcome GWAS (`outcome_id`), the genome
+  `build`, a `locus_id` and the p-value `mr_p`.
+- **`coloc`**: one row per colocalization result, with `coloc_id`, the same four keys (`exposure_id`,
+  `outcome_id`, `build`, `locus_id`) and the posterior probability `h4`.
+
+Rows are joined on the four keys. Nothing is joined by position, and nothing is guessed. For each MR row you get
+a `status`, the matched coloc row, and, if the row meets the criteria of Karim et al., the historical launch
+proportion of their support group.
+
+## 2. Four candidates
+
+```{r}
+library(geneticPoS)
+
+loc <- function(id) data.frame(exposure_id = paste0("P", id), outcome_id = "D1",
+                               build = "GRCh38", locus_id = paste0("L", id))
+mr <- rbind(
+  cbind(loc(1), mr_id = "M1", target_id = "G1", indication_id = "UC", mr_p = 4e-10,
+        l2g_share = 0.67, mesh_similarity = 0.91, measured = TRUE),   # meets every threshold
+  cbind(loc(2), mr_id = "M2", target_id = "G2", indication_id = "UC", mr_p = 1e-5,
+        l2g_share = 0.80, mesh_similarity = 0.95, measured = TRUE),   # MR p-value too weak
+  cbind(loc(3), mr_id = "M3", target_id = "G3", indication_id = "UC", mr_p = 2e-11,
+        l2g_share = NA,   mesh_similarity = 0.90, measured = TRUE),   # no L2G share
+  cbind(loc(4), mr_id = "M4", target_id = "G4", indication_id = "UC", mr_p = 3e-12,
+        l2g_share = 0.60, mesh_similarity = 0.85, measured = TRUE))   # two coloc rows fit
+coloc <- rbind(
+  cbind(loc(1), coloc_id = "K1",  h4 = 0.93),
+  cbind(loc(2), coloc_id = "K2",  h4 = 0.95),
+  cbind(loc(3), coloc_id = "K3",  h4 = 0.90),
+  cbind(loc(4), coloc_id = "K4a", h4 = 0.90),
+  cbind(loc(4), coloc_id = "K4b", h4 = 0.70))
+
+res <- karim_pos(mr, coloc)
+res$candidates[, c("mr_id", "mr_p", "l2g_share", "h4", "status", "missing_fields",
+                   "match_basis", "reference_group", "historical_launch_rate")]
+```
+
+```text
+  mr_id  mr_p l2g_share   h4             status missing_fields       match_basis reference_group historical_launch_rate
+1    M1 4e-10      0.67 0.93     thresholds_met                exact_identifiers       supported              0.5555556
+2    M2 1e-05      0.80 0.95 thresholds_not_met                exact_identifiers            <NA>                     NA
+3    M3 2e-11        NA 0.90     missing_inputs      l2g_share exact_identifiers            <NA>                     NA
+4    M4 3e-12      0.60   NA    coloc_ambiguous                             <NA>            <NA>                     NA
+```
+
+## 3. Reading the status
+
+| `status` | What it means | What to do |
+|---|---|---|
+| `thresholds_met` | Matched, and MR p ≤ 0.05/47,000,000, H4 ≥ 0.8, L2G share ≥ 0.5, MeSH similarity ≥ 0.8, measured target. Gets `reference_group = "supported"` and the launch proportion. | Read the proportion as a past group outcome (section 6). |
+| `thresholds_not_met` | Matched and complete, but at least one threshold is missed (here `M2`: MR p = 1e-5). No reference group is assigned. | Nothing to fix. One analysis failing a threshold does not by itself put the gene–indication pair in the comparison group. |
+| `missing_inputs` | A value is missing; `missing_fields` names it (here `l2g_share`). | Supply it (section 4). |
+| `coloc_ambiguous` / `coloc_unmatched` | More than one, or no, coloc row has the same keys. | Add `signal_id` to both tables, or link the rows yourself (section 4). |
+| `link_conflict` | Rows you linked disagree on a key. | Check the identifiers. |
+| `outside_pqtl_reference` | `qtl_type` says the result is not a pQTL, for example an eQTL. | The benchmark does not cover it. |
+| `outside_measured_background` | `measured` is `FALSE`: the target is not measured by the pQTL assay. | The benchmark does not cover it. |
+| `invalid_input` | A p-value, H4, L2G share or similarity is outside [0, 1]. | Fix the value. |
+
+## 4. Fix what can be fixed
+
+**A missing value (`M3`).** Pass it in `metadata`, keyed by the row of the MR table (`source_row`, counted from
+one). `metadata` only fills missing values; a value that conflicts with the table is refused.
+
+```{r}
+res2 <- karim_pos(mr, coloc,
+                  metadata = list(mr = data.frame(source_row = 3, l2g_share = 0.7)))
+res2$candidates[, c("mr_id", "l2g_share", "l2g_share_source", "status")]
+```
+
+```text
+  mr_id l2g_share l2g_share_source             status
+1    M1      0.67             user     thresholds_met
+2    M2      0.80             user thresholds_not_met
+3    M3      0.70             user     thresholds_met
+4    M4      0.60             user    coloc_ambiguous
+```
+
+`l2g_share_source` records where each value came from (`user` here).
+
+**Two coloc rows fit (`M4`).** If your tables have several signals per locus, give both a `signal_id`. If you
+have checked in the source papers which coloc row belongs to the MR row, link them and state the evidence:
+
+```{r}
+links <- data.frame(mr_id = "M4", coloc_id = "K4a",
+                    basis = "Same signal in the source paper, Table 2")
+res3 <- karim_pos(mr, coloc, links = links)
+res3$candidates[, c("mr_id", "matched_coloc_id", "h4", "status", "match_basis", "reference_group")]
+```
+
+```text
+  mr_id matched_coloc_id   h4             status       match_basis reference_group
+1    M1               K1 0.93     thresholds_met exact_identifiers       supported
+2    M2               K2 0.95 thresholds_not_met exact_identifiers            <NA>
+3    M3               K3 0.90     missing_inputs exact_identifiers            <NA>
+4    M4              K4a 0.90     thresholds_met    user_confirmed       supported
+```
+
+`match_basis` now says `user_confirmed`: the link is yours, not the package's.
+
+## 5. Let the bundled reference fill in values
+
+The package carries a processed snapshot of the Karim reference. For a real gene symbol, indication MeSH ID
+and outcome GWAS ID it looks up the MeSH similarity and whether the target is measured, and it says so in the
+`*_source` columns. Here, IL23R and Crohn's disease (MeSH D003424, GWAS GCST004132), with no values supplied:
+
+```{r}
+keys <- data.frame(exposure_id = "IL23R.pQTL", outcome_id = "GCST004132",
+                   build = "GRCh37", locus_id = "rs11581607")
+mr    <- cbind(keys, mr_id = "IL23R_CD", target_id = "IL23R", indication_id = "D003424", mr_p = 5.9e-93)
+coloc <- cbind(keys, coloc_id = "c1", h4 = 0.993)
+
+r <- karim_pos(mr, coloc)
+r$candidates[, c("l2g_share", "l2g_share_source", "mesh_similarity", "mesh_similarity_source",
+                 "measured", "measured_source", "status", "missing_fields")]
+```
+
+```text
+  l2g_share l2g_share_source mesh_similarity mesh_similarity_source measured measured_source         status missing_fields
+1        NA      unavailable               1          karim_mapping     TRUE  karim_measured missing_inputs      l2g_share
+```
+
+The L2G share is specific to your locus, so the snapshot does not guess it. Give it, with its source, and the
+row reaches the support group:
+
+```{r}
+r2 <- karim_pos(mr, coloc, metadata = list(mr = list(l2g_share = 0.55)))
+r2$candidates[, c("l2g_share", "l2g_share_source", "status", "reference_group", "historical_launch_rate")]
+```
+
+```text
+  l2g_share l2g_share_source         status reference_group historical_launch_rate
+1      0.55             user thresholds_met       supported              0.5555556
+```
+
+[The independent check](https://github.com/DaikiKumakura/geneticPoS/blob/main/reproducibility/INDEPENDENT_PQTL.md)
+extracts the coefficients for this pair from public data and explains where 0.55 comes from.
+
+## 6. What the number means
+
+```{r}
+res3$benchmark[, c("group", "phase1_n", "launched_n", "relative_success", "rs_lower", "rs_upper")]
+```
+
+```text
+       group phase1_n launched_n relative_success rs_lower rs_upper
+1  supported       36         20             5.24     3.88     7.07
+2 comparison     7164        760             5.24     3.88     7.07
+```
+
+Of 36 gene–indication pairs in the support group of Karim v2 Figure 1a, 20 went from phase 1 to launch
+(55.56%); of 7,164 pairs in the comparison group, 760 did (10.6%). The relative success is 5.24 (3.88 to 7.07).
+These are past group outcomes. `thresholds_met` puts a candidate in the group that the numbers describe; it does
+not make 55.56% the probability that this candidate launches, and the package does not evaluate how well it
+predicts a single candidate.
+
+## 7. Next
+
+- `?karim_pos` lists every argument, including `mapping` for your own column names.
+- `references` in the result is the full bundled table (116 rows), including the other benchmarks.
+- [Sources and terms of the reference data](https://github.com/DaikiKumakura/geneticPoS/blob/main/DATA_SOURCES.md).

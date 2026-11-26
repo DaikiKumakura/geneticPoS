@@ -5,3 +5,4 @@
 ^CITATION\.cff$
 ^_pkgdown\.yml$
 ^\.github$
+^vignettes/articles$
