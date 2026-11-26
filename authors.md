@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/DaikiKumakura/geneticPoS/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/DaikiKumakura/geneticPoS/blob/v0.5.0/DESCRIPTION)
 
 Kumakura D (2026). *geneticPoS: Relate Genetic Evidence to a Drug
 Development Benchmark*. R package version 0.5.0,
