@@ -3,6 +3,10 @@
 ## geneticPoS 0.5.0
 
 - [`karim_pos()`](https://daikikumakura.github.io/geneticPoS/reference/karim_pos.md)
-  で、論文や解析記録から確認したMR・colocの行対応を根拠付きで指定できるようにしました。
-- 既知のMR・coloc列名と補足メタデータを使い、同梱参照から該当するKarimベンチマークを取得できます。
-- 独立pQTL実データの検証手順と、支持群への適用を再実行するスクリプトを同梱しました。
+  accepts, through `links`, the MR-to-coloc row correspondences that you
+  have confirmed from papers or analysis records, together with their
+  evidence.
+- Known MR and coloc column names and supplementary metadata are used to
+  retrieve the matching Karim benchmark from the bundled reference.
+- The package ships the steps of an independent check on real pQTL data
+  and a script that reruns its application to the support group.
