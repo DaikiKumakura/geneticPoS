@@ -1,18 +1,18 @@
-# 参照データの出典と再生成
+# Sources and regeneration of the reference data
 
-| ファイル | 内容と変換 |
+| File | Content and transformation |
 |---|---|
-| `inst/extdata/benchmarks.tsv.gz` | Karim由来の集計Parquetを `pos_id` 順で抽出した116行。候補の参照先は、v2 Figure 1a の MR＋coloc 比較。 |
-| `inst/extdata/mapping.tsv.gz` | 臨床マッピングを遺伝子・適応症のMeSH ID・GWAS IDごとに集約。L2G shareとMeSH類似度は、それぞれ一意の値を採用。 |
-| `inst/extdata/measured.tsv.gz` | 遺伝子ごとに一意に解決できるpQTL測定対象のフラグ。 |
-| `reproducibility/data/delange_il23r_source.csv` | 独立検証で使う公開統計の一座位の抽出値。由来と照合手順は [実データ検証](reproducibility/INDEPENDENT_PQTL.md) に記載。 |
+| `inst/extdata/benchmarks.tsv.gz` | 116 rows extracted, in `pos_id` order, from the Karim summary Parquet. The candidate reference is the MR + coloc comparison of v2 Figure 1a. |
+| `inst/extdata/mapping.tsv.gz` | The clinical mapping, aggregated by gene, indication MeSH ID and GWAS ID. The L2G share and the MeSH similarity are each taken as the unique value. |
+| `inst/extdata/measured.tsv.gz` | Flags of pQTL-measured targets that resolve uniquely per gene. |
+| `reproducibility/data/delange_il23r_source.csv` | The extract of one locus from public summary statistics, used in the independent check. Its origin and the matching steps are in the [real-data check](reproducibility/INDEPENDENT_PQTL.md). |
 
-Karim, Hukku, Ariano ほかの公開資料に基づく加工スナップショットです。上流GitHubのプロジェクトは CC BY 4.0 を明示しています。Zenodoの個別ファイル、および上流の第三者由来データを含む加工表への再配布条件は公開前に確認してください。GPL-3 は本パッケージのコードに適用されます。 [Karim 原著](https://doi.org/10.64898/2026.02.23.26346731) · [著者リポジトリ](https://github.com/mohdkarim/mrcoloc) · [著者データのZenodo DOI](https://doi.org/10.5281/zenodo.18451758) · [Minikel ら](https://doi.org/10.1038/s41586-024-07316-0)
+This is a processed snapshot based on the public materials of Karim, Hukku, Ariano and others. The upstream GitHub project states CC BY 4.0. Check the redistribution terms of the individual Zenodo files, and of processed tables that contain third-party upstream data, before publication. GPL-3 applies to the code of this package. [Karim et al.](https://doi.org/10.64898/2026.02.23.26346731) · [Authors' repository](https://github.com/mohdkarim/mrcoloc) · [Zenodo DOI of the authors' data](https://doi.org/10.5281/zenodo.18451758) · [Minikel et al.](https://doi.org/10.1038/s41586-024-07316-0)
 
-参照を再生成するには、2つの入力Parquetを同じフォルダに置き、DuckDBのPythonパッケージを入れた環境で実行します。
+To regenerate the references, put the two input Parquet files in one folder and run this in an environment with the DuckDB Python package.
 
 ```sh
 python reproducibility/build_karim_refs.py PATH_TO_PARQUETS NEW_OUTPUT_DIRECTORY
 ```
 
-同梱TSVと再生成結果は展開後の表として比較できます。著者の上流解析を再実行する場合は著者リポジトリを参照してください。上記のZenodo DOIは著者資料の識別子です。このパッケージの加工表用に新規のZenodo DOIを発行した場合は、版とファイルのハッシュをこの文書に記録してください。
+The bundled TSV files and the regenerated output can be compared as expanded tables. To rerun the authors' upstream analysis, see the authors' repository. The Zenodo DOI above identifies the authors' materials. If a new Zenodo DOI is issued for the processed tables of this package, record its version and the file hashes in this document.
