@@ -48,30 +48,32 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="geneticpos">geneticPoS<a class="anchor" aria-label="anchor" href="#geneticpos"></a>
 </h1></div>
-<p><code>geneticPoS</code> は、遺伝統計学者が自分の cis-pQTL MR・共局在結果を Karim らの遺伝的支持基準に照らす R パッケージです。条件を満たした候補には、Karim v2 Figure 1a の MR＋coloc 支持群で第1相から上市した割合（20/36）を付けます。この割合は過去の集団実績です。 <a href="https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full" class="external-link">Karim ら v2</a></p>
+<p><code>geneticPoS</code> lets a statistical geneticist hold their own cis-pQTL Mendelian randomization (MR) and colocalization results against the genetic-support criteria of Karim et al. A candidate that meets the criteria is given the historical proportion of the MR + coloc support group of Karim v2 Figure 1a that went from phase 1 to launch (20/36). This proportion is a past population outcome, not a probability for the candidate. <a href="https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full" class="external-link">Karim et al. v2</a></p>
 <div class="section level2">
-<h2 id="インストール">インストール<a class="anchor" aria-label="anchor" href="#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB"></a>
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>リポジトリのパッケージルートで実行します。</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">R</span> CMD INSTALL .</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"geneticPoS"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://daikikumakura.r-universe.dev"</span>, <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Or from the package root of a clone of this repository:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">R</span> CMD INSTALL .</span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="自分の解析結果を使う">自分の解析結果を使う<a class="anchor" aria-label="anchor" href="#%E8%87%AA%E5%88%86%E3%81%AE%E8%A7%A3%E6%9E%90%E7%B5%90%E6%9E%9C%E3%82%92%E4%BD%BF%E3%81%86"></a>
+<h2 id="use-your-own-results">Use your own results<a class="anchor" aria-label="anchor" href="#use-your-own-results"></a>
 </h2>
 <ol style="list-style-type: decimal">
-<li>cis-MR の結果表と coloc の結果表を用意します。データフレーム、CSV、TSV を渡せます。TwoSampleMR の <code>pval</code>、coloc の <code>PP.H4.abf</code> などは認識されます。</li>
-<li>MR と coloc の両方に pQTL アッセイ、アウトカム GWAS、ゲノムビルド、座位の識別子を付けます。同一座位に複数シグナルがある場合は <code>signal_id</code> も両表に付けます。MR側には遺伝子シンボルと適応症の MeSH ID も必要です。</li>
-<li>同梱参照で不足する場合は、対象座位の <code>l2g_share</code>、<code>mesh_similarity</code>、測定対象を表す <code>measured</code> を指定します。入力表にない情報は <code>metadata</code> に渡せます。原資料から個別の行対応を確認済みの場合は、根拠とともに <code>links</code> を指定できます。</li>
+<li>Prepare a cis-MR result table and a coloc result table. Data frames, CSV and TSV files are accepted. Column names such as <code>pval</code> from TwoSampleMR and <code>PP.H4.abf</code> from coloc are recognized.</li>
+<li>Give both tables the pQTL assay, the outcome GWAS, the genome build and a locus identifier. If a locus has several signals, add <code>signal_id</code> to both tables. The MR table also needs the gene symbol and the MeSH ID of the indication.</li>
+<li>If the bundled reference lacks something for your locus, pass <code>l2g_share</code>, <code>mesh_similarity</code> and <code>measured</code> (whether the target is measured). Information missing from your tables can be passed in <code>metadata</code>. If you have confirmed from the source papers which MR row belongs to which coloc row, pass that with its evidence in <code>links</code>.</li>
 </ol>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/DaikiKumakura/geneticPoS" class="external-link">geneticPoS</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/example.html" class="external-link">example</a></span><span class="op">(</span><span class="va">karim_pos</span><span class="op">)</span></span></code></pre></div>
-<p>公開pQTLの実例を実行するには、インストール後にリポジトリのルートで次を実行します。</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">--vanilla</span> reproducibility/check_delange_pqtl.R</span></code></pre></div>
-<p>IL23R × クローン病について、標準的なMR・coloc列名で入力し、対象座位に対応したL2G shareを渡して支持群まで到達します。公開原資料から係数を抽出し直す手順もあります。 <a href="reproducibility/INDEPENDENT_PQTL.html">実データ検証</a></p>
+<p>To run a public pQTL example, run this at the repository root after installing:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">--vanilla</span> reproducibility/check_delange_pqtl.R</span></code></pre></div>
+<p>It enters IL23R × Crohn’s disease with standard MR and coloc column names, supplies the L2G share for that locus, and reaches the support group. The script can also re-extract the coefficients from the public source data. <a href="reproducibility/INDEPENDENT_PQTL.html">Independent pQTL check</a></p>
 </div>
 <div class="section level2">
-<h2 id="結果を読む">結果を読む<a class="anchor" aria-label="anchor" href="#%E7%B5%90%E6%9E%9C%E3%82%92%E8%AA%AD%E3%82%80"></a>
+<h2 id="read-the-result">Read the result<a class="anchor" aria-label="anchor" href="#read-the-result"></a>
 </h2>
 <table class="table">
 <colgroup>
@@ -79,53 +81,53 @@
 <col width="50%">
 </colgroup>
 <thead><tr>
-<th>出力</th>
-<th>内容</th>
+<th>Output</th>
+<th>Content</th>
 </tr></thead>
 <tbody>
 <tr>
 <td><code>candidates</code></td>
-<td>候補別の判定、MR p値、H4、参照値と由来、照合方法、欠損項目</td>
+<td>Per candidate: verdict, MR p-value, H4, reference value and its source, how the reference was matched, missing items</td>
 </tr>
 <tr>
 <td><code>benchmark</code></td>
-<td>Figure 1a の支持群・比較群の分母、上市数、過去上市割合</td>
+<td>Denominators, launches and historical launch proportion of the support and comparison groups of Figure 1a</td>
 </tr>
 <tr>
 <td><code>references</code></td>
-<td>同梱参照に収録された他のベンチマークを含む116行</td>
+<td>The 116 rows of the bundled reference, including the other benchmarks</td>
 </tr>
 <tr>
 <td><code>inputs</code></td>
-<td>参照解決前の入力</td>
+<td>The input before the reference was resolved</td>
 </tr>
 </tbody>
 </table>
-<p>支持群の条件は MR p ≤ 0.05/47,000,000、H4 ≥ 0.8、L2G share ≥ 0.5、MeSH類似度 ≥ 0.8、測定対象であることです。対応不明、複数一致、参照不足、閾値未達は <code>status</code> に残ります。個々の解析の閾値未達だけで、遺伝子と適応症の組が比較群に入るとは判断できません。引数と判定の詳細は <code><a href="reference/karim_pos.html">?karim_pos</a></code> を参照してください。</p>
+<p>The support group requires MR p ≤ 0.05/47,000,000, H4 ≥ 0.8, L2G share ≥ 0.5, MeSH similarity ≥ 0.8 and a measured target. Unmatched rows, multiple matches, missing references and unmet thresholds stay in <code>status</code>. A single analysis failing a threshold does not by itself put a gene–indication pair in the comparison group. See <code><a href="reference/karim_pos.html">?karim_pos</a></code> for the arguments and the details of the verdict.</p>
 </div>
 <div class="section level2">
-<h2 id="検証と制約">検証と制約<a class="anchor" aria-label="anchor" href="#%E6%A4%9C%E8%A8%BC%E3%81%A8%E5%88%B6%E7%B4%84"></a>
+<h2 id="validation-and-limitations">Validation and limitations<a class="anchor" aria-label="anchor" href="#validation-and-limitations"></a>
 </h2>
 <ul>
 <li>
-<strong>検証</strong> — テストで行の照合、欠損、複数一致を確認しました。公開データを使い、IL23R × クローン病の1組で判定を再現しました。</li>
+<strong>Validation:</strong> the tests cover row matching, missing values and multiple matches. A public data set (IL23R × Crohn’s disease, one pair) reproduces the verdict.</li>
 <li>
-<strong>結果</strong> — この組は支持基準を満たし、過去上市割合 20/36（55.56%）が返りました。</li>
+<strong>Result:</strong> this pair meets the support criteria and returns the historical launch proportion of 20/36 (55.56%).</li>
 <li>
-<strong>制約</strong> — 実データでの動作確認は1組です。個別候補の上市確率の予測精度は評価していません。</li>
+<strong>Limitations:</strong> the check on real data covers one pair. How well the package predicts the launch of an individual candidate has not been evaluated.</li>
 <li>
-<strong>再現資料</strong> — <a href="reproducibility/INDEPENDENT_PQTL.html">実データ検証の入力と手順</a>。</li>
+<strong>Reproducibility:</strong> <a href="reproducibility/INDEPENDENT_PQTL.html">inputs and steps of the independent check</a>.</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="引用">引用<a class="anchor" aria-label="anchor" href="#%E5%BC%95%E7%94%A8"></a>
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>アーカイブ版を引用してください（全版）: <a href="https://doi.org/10.5281/zenodo.24549534" class="external-link uri">https://doi.org/10.5281/zenodo.24549534</a>。メタデータは <a href="CITATION.cff">CITATION.cff</a> にあります。参照ベンチマークの出典は <a href="https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full" class="external-link">Karim ら v2</a> です。</p>
+<p>Cite the archived version: <a href="https://doi.org/10.5281/zenodo.24549534" class="external-link uri">https://doi.org/10.5281/zenodo.24549534</a> (all versions). The metadata is in <a href="CITATION.cff"><code>CITATION.cff</code></a>; <code>citation("geneticPoS")</code> gives the same. The source of the reference benchmark is <a href="https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full" class="external-link">Karim et al. v2</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="ライセンス">ライセンス<a class="anchor" aria-label="anchor" href="#%E3%83%A9%E3%82%A4%E3%82%BB%E3%83%B3%E3%82%B9"></a>
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>コードは GPL-3 です。参照データの出典、変換、配布条件は <a href="DATA_SOURCES.html">DATA_SOURCES.md</a> に記録しています。</p>
+<p>The code is GPL-3. The sources, transformations and terms of the reference data are in <a href="DATA_SOURCES.html">DATA_SOURCES.md</a>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

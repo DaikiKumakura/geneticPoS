@@ -1,35 +1,42 @@
 # geneticPoS
 
-`geneticPoS` は、遺伝統計学者が自分の cis-pQTL MR・共局在結果を Karim
-らの遺伝的支持基準に照らす R
-パッケージです。条件を満たした候補には、Karim v2 Figure 1a の MR＋coloc
-支持群で第1相から上市した割合（20/36）を付けます。この割合は過去の集団実績です。
-[Karim ら
-v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full)
+`geneticPoS` lets a statistical geneticist hold their own cis-pQTL
+Mendelian randomization (MR) and colocalization results against the
+genetic-support criteria of Karim et al. A candidate that meets the
+criteria is given the historical proportion of the MR + coloc support
+group of Karim v2 Figure 1a that went from phase 1 to launch (20/36).
+This proportion is a past population outcome, not a probability for the
+candidate. [Karim et
+al. v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full)
 
-## インストール
+## Installation
 
-リポジトリのパッケージルートで実行します。
+``` r
+
+install.packages("geneticPoS", repos = c("https://daikikumakura.r-universe.dev", "https://cloud.r-project.org"))
+```
+
+Or from the package root of a clone of this repository:
 
 ``` sh
 R CMD INSTALL .
 ```
 
-## 自分の解析結果を使う
+## Use your own results
 
-1.  cis-MR の結果表と coloc
-    の結果表を用意します。データフレーム、CSV、TSV
-    を渡せます。TwoSampleMR の `pval`、coloc の `PP.H4.abf`
-    などは認識されます。
-2.  MR と coloc の両方に pQTL アッセイ、アウトカム
-    GWAS、ゲノムビルド、座位の識別子を付けます。同一座位に複数シグナルがある場合は
-    `signal_id` も両表に付けます。MR側には遺伝子シンボルと適応症の MeSH
-    ID も必要です。
-3.  同梱参照で不足する場合は、対象座位の
-    `l2g_share`、`mesh_similarity`、測定対象を表す `measured`
-    を指定します。入力表にない情報は `metadata`
-    に渡せます。原資料から個別の行対応を確認済みの場合は、根拠とともに
-    `links` を指定できます。
+1.  Prepare a cis-MR result table and a coloc result table. Data frames,
+    CSV and TSV files are accepted. Column names such as `pval` from
+    TwoSampleMR and `PP.H4.abf` from coloc are recognized.
+2.  Give both tables the pQTL assay, the outcome GWAS, the genome build
+    and a locus identifier. If a locus has several signals, add
+    `signal_id` to both tables. The MR table also needs the gene symbol
+    and the MeSH ID of the indication.
+3.  If the bundled reference lacks something for your locus, pass
+    `l2g_share`, `mesh_similarity` and `measured` (whether the target is
+    measured). Information missing from your tables can be passed in
+    `metadata`. If you have confirmed from the source papers which MR
+    row belongs to which coloc row, pass that with its evidence in
+    `links`.
 
 ``` r
 
@@ -37,60 +44,63 @@ library(geneticPoS)
 example(karim_pos)
 ```
 
-公開pQTLの実例を実行するには、インストール後にリポジトリのルートで次を実行します。
+To run a public pQTL example, run this at the repository root after
+installing:
 
 ``` sh
 Rscript --vanilla reproducibility/check_delange_pqtl.R
 ```
 
-IL23R ×
-クローン病について、標準的なMR・coloc列名で入力し、対象座位に対応したL2G
-shareを渡して支持群まで到達します。公開原資料から係数を抽出し直す手順もあります。
-[実データ検証](https://daikikumakura.github.io/geneticPoS/reproducibility/INDEPENDENT_PQTL.md)
+It enters IL23R × Crohn’s disease with standard MR and coloc column
+names, supplies the L2G share for that locus, and reaches the support
+group. The script can also re-extract the coefficients from the public
+source data. [Independent pQTL
+check](https://daikikumakura.github.io/geneticPoS/reproducibility/INDEPENDENT_PQTL.md)
 
-## 結果を読む
+## Read the result
 
-| 出力         | 内容                                                       |
-|--------------|------------------------------------------------------------|
-| `candidates` | 候補別の判定、MR p値、H4、参照値と由来、照合方法、欠損項目 |
-| `benchmark`  | Figure 1a の支持群・比較群の分母、上市数、過去上市割合     |
-| `references` | 同梱参照に収録された他のベンチマークを含む116行            |
-| `inputs`     | 参照解決前の入力                                           |
+| Output | Content |
+|----|----|
+| `candidates` | Per candidate: verdict, MR p-value, H4, reference value and its source, how the reference was matched, missing items |
+| `benchmark` | Denominators, launches and historical launch proportion of the support and comparison groups of Figure 1a |
+| `references` | The 116 rows of the bundled reference, including the other benchmarks |
+| `inputs` | The input before the reference was resolved |
 
-支持群の条件は MR p ≤ 0.05/47,000,000、H4 ≥ 0.8、L2G share ≥
-0.5、MeSH類似度 ≥
-0.8、測定対象であることです。対応不明、複数一致、参照不足、閾値未達は
-`status`
-に残ります。個々の解析の閾値未達だけで、遺伝子と適応症の組が比較群に入るとは判断できません。引数と判定の詳細は
+The support group requires MR p ≤ 0.05/47,000,000, H4 ≥ 0.8, L2G share ≥
+0.5, MeSH similarity ≥ 0.8 and a measured target. Unmatched rows,
+multiple matches, missing references and unmet thresholds stay in
+`status`. A single analysis failing a threshold does not by itself put a
+gene–indication pair in the comparison group. See
 [`?karim_pos`](https://daikikumakura.github.io/geneticPoS/reference/karim_pos.md)
-を参照してください。
+for the arguments and the details of the verdict.
 
-## 検証と制約
+## Validation and limitations
 
-- **検証** —
-  テストで行の照合、欠損、複数一致を確認しました。公開データを使い、IL23R
-  × クローン病の1組で判定を再現しました。
-- **結果** — この組は支持基準を満たし、過去上市割合
-  20/36（55.56%）が返りました。
-- **制約** —
-  実データでの動作確認は1組です。個別候補の上市確率の予測精度は評価していません。
-- **再現資料** —
-  [実データ検証の入力と手順](https://daikikumakura.github.io/geneticPoS/reproducibility/INDEPENDENT_PQTL.md)。
+- **Validation:** the tests cover row matching, missing values and
+  multiple matches. A public data set (IL23R × Crohn’s disease, one
+  pair) reproduces the verdict.
+- **Result:** this pair meets the support criteria and returns the
+  historical launch proportion of 20/36 (55.56%).
+- **Limitations:** the check on real data covers one pair. How well the
+  package predicts the launch of an individual candidate has not been
+  evaluated.
+- **Reproducibility:** [inputs and steps of the independent
+  check](https://daikikumakura.github.io/geneticPoS/reproducibility/INDEPENDENT_PQTL.md).
 
-## 引用
+## Citation
 
-アーカイブ版を引用してください（全版）:
-<https://doi.org/10.5281/zenodo.24549534>。メタデータは
-[CITATION.cff](https://daikikumakura.github.io/geneticPoS/CITATION.cff)
-にあります。参照ベンチマークの出典は [Karim ら
-v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full)
-です。
+Cite the archived version: <https://doi.org/10.5281/zenodo.24549534>
+(all versions). The metadata is in
+[`CITATION.cff`](https://daikikumakura.github.io/geneticPoS/CITATION.cff);
+`citation("geneticPoS")` gives the same. The source of the reference
+benchmark is [Karim et
+al. v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full).
 
-## ライセンス
+## License
 
-コードは GPL-3 です。参照データの出典、変換、配布条件は
-[DATA_SOURCES.md](https://daikikumakura.github.io/geneticPoS/DATA_SOURCES.md)
-に記録しています。
+The code is GPL-3. The sources, transformations and terms of the
+reference data are in
+[DATA_SOURCES.md](https://daikikumakura.github.io/geneticPoS/DATA_SOURCES.md).
 
 # Package index
 
