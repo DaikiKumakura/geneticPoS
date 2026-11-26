@@ -6,5 +6,6 @@ authors:
   - family-names: Kumakura
     given-names: Daiki
 version: 0.5.0
+doi: 10.5281/zenodo.24549534
 license: GPL-3.0-only
 repository-code: https://github.com/DaikiKumakura/geneticPoS

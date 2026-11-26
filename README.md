@@ -49,7 +49,7 @@ IL23R × クローン病について、標準的なMR・coloc列名で入力し�
 
 ## 引用
 
-パッケージは `citation("geneticPoS")` または [CITATION.cff](CITATION.cff) を参照してください。参照ベンチマークの出典は [Karim ら v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full) です。
+アーカイブ版を引用してください（全版）: <https://doi.org/10.5281/zenodo.24549534>。メタデータは [CITATION.cff](CITATION.cff) にあります。参照ベンチマークの出典は [Karim ら v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full) です。
 
 ## ライセンス
 
