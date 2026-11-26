@@ -152,3 +152,9 @@ sources, transformations and terms of the reference data are in
   : Relate user-supplied MR and colocalization results to the Karim
   benchmark
 
+# Articles
+
+### Articles
+
+- [From your MR and coloc results to a benchmark
+  verdict](https://daikikumakura.github.io/geneticPoS/articles/tutorial.md):
