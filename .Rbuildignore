@@ -1,0 +1,7 @@
+^LICENSE$
+^NEWS\.md$
+^DATA_SOURCES\.md$
+^reproducibility$
+^CITATION\.cff$
+^_pkgdown\.yml$
+^\.github$

@@ -1,0 +1,13 @@
+url: https://daikikumakura.github.io/geneticPoS/
+template:
+  bootstrap: 5
+  bslib:
+    bg: "#ffffff"
+    fg: "#252525"
+    primary: "#25577b"
+    border-color: "#dddddd"
+    line-height-base: 1.65
+    headings-font-weight: 500
+reference:
+  - title: Genetic evidence benchmark
+    contents: [karim_pos]

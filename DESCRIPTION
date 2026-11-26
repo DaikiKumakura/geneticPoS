@@ -1,0 +1,14 @@
+Package: geneticPoS
+Type: Package
+Title: Relate Genetic Evidence to a Drug Development Benchmark
+Version: 0.5.0
+Authors@R: person("Daiki", "Kumakura", role = c("aut", "cre"),
+    email = "55353329+DaikiKumakura@users.noreply.github.com")
+Description: Relate user-supplied Mendelian randomization and colocalization
+    results to the reported historical launch proportions of Karim et al.
+    (2026) <doi:10.64898/2026.02.23.26346731>.
+License: GPL-3
+URL: https://github.com/DaikiKumakura/geneticPoS
+BugReports: https://github.com/DaikiKumakura/geneticPoS/issues
+Encoding: UTF-8
+Imports: utils

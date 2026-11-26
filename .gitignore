@@ -1,0 +1,7 @@
+.Rhistory
+.RData
+.Rproj.user/
+*.Rcheck/
+*.tar.gz
+reproducibility/data/*
+!reproducibility/data/delange_il23r_source.csv

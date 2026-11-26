@@ -1,0 +1,2 @@
+assay,variant,marker,beta_x,se_x,beta_y,se_y,gwas_p,minikel_arow,l2g_share
+IL23R.5088.175.3,rs11581607,1:67707690_G_A,-0.42,0.0491,0.7935,0.0388,6.33e-93,244136,0.55
