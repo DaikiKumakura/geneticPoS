@@ -79,9 +79,10 @@ shareを渡して支持群まで到達します。公開原資料から係数を
 
 ## 引用
 
-パッケージは `citation("geneticPoS")` または
+アーカイブ版を引用してください（全版）:
+<https://doi.org/10.5281/zenodo.24549534>。メタデータは
 [CITATION.cff](https://daikikumakura.github.io/geneticPoS/CITATION.cff)
-を参照してください。参照ベンチマークの出典は [Karim ら
+にあります。参照ベンチマークの出典は [Karim ら
 v2](https://www.medrxiv.org/content/10.64898/2026.02.23.26346731v2.full)
 です。
 
